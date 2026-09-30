@@ -3,6 +3,7 @@ use http_body_util::Full;
 use hyper::{Response, body::Bytes, server::conn::http1, service::service_fn};
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpListener;
+use tonic::transport::Channel;
 
 use crate::gateway::{ActionRequest, gateway_client::GatewayClient};
 
@@ -12,7 +13,9 @@ pub mod gateway {
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let client = GatewayClient::connect("http://[::1]:50051").await?;
+    let channel = Channel::from_static("http://[::1]:50051")
+        .connect_lazy();
+    let client = GatewayClient::new(channel);
 
     let addr: SocketAddr = ([127, 0, 0, 1], 3000).into();
     let listener = TcpListener::bind(addr).await?;
@@ -25,20 +28,34 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let client = client.clone();
 
         let service = service_fn(move |mut _req| {
-            let client = client.clone();
-            let request = tonic::Request::new(ActionRequest {
-                action: "get_users".to_string(),
-                data: "{\"name\": \"ow1\"}".to_string(),
-            });
+            let mut client = client.clone();
 
             async move {
-                let mut client = client.clone();
-                let resp = client.action(request).await;
-                let msg = resp.unwrap().into_inner().message;
+                let request = tonic::Request::new(ActionRequest {
+                    action: "get_users".to_string(),
+                    data: "{\"name\": \"ow1\"}".to_string(),
+                });
+                
+                match client.action(request).await {
+                   Ok(response) => {
+                        let msg = response.into_inner().message;
+                        Ok::<_, hyper::Error>(
+                            Response::new(Full::new(Bytes::from(msg)))
+                        )
+                    }
+                    Err(status) => {
+                        println!("gRPC error: {status}");
 
-                Ok::<_, hyper::Error>(Response::new(
-                    Full::new(Bytes::from(msg))
-                ))
+                        Ok::<_, hyper::Error>(
+                            Response::builder()
+                                .status(503)
+                                .body(Full::new(
+                                    Bytes::from("Service unavailable")
+                                ))
+                                .unwrap()
+                        )
+                    }
+                }
             }
         });
 
