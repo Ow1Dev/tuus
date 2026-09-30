@@ -26,6 +26,7 @@
         devShell = pkgs.mkShell {
           packages = with pkgs; [
             rust
+            protobuf
           ];
         };
       }

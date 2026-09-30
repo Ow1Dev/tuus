@@ -1,0 +1,15 @@
+syntax = "proto3";
+package gateway;
+
+service Gateway {
+  rpc Action (ActionRequest) returns (ActionReply);
+}
+
+message ActionRequest {
+    string action = 1;
+    string data = 2;
+}
+
+message ActionReply {
+    string message = 1;
+}

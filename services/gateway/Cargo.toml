@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hyper = "1.11.1"
+http-body-util = "0.1.5"
+hyper = { version = "1.11.1", features = ["http1", "server"] }
+hyper-util = "0.1.21"
+prost = "0.14"
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "net"] }
+tonic = "*"
+tonic-prost = "*"
+
+[build-dependencies]
+tonic-prost-build = "*"
 
