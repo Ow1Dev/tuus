@@ -10,7 +10,7 @@ async fn get_users(req: Request, _: Context) -> Result<String, Problem> {
 }
 
 async fn get_user(_: Request, _: Context) -> Result<String, Problem> {
-    Ok(format!("get_user yay"))
+    Ok("get_user yay".to_string())
 }
 
 #[tokio::main]

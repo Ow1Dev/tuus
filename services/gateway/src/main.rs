@@ -32,7 +32,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
             async move {
                 let path: Vec<&str> = req.uri().path().split('/').collect();
-                if path.iter().count() == 2 {
+                if path.len() == 2 {
                     return Ok::<_, hyper::Error>(
                         Response::builder()
                             .status(400)
