@@ -29,6 +29,7 @@ pub struct Service {
 impl Gateway for Service {
     async fn action(&self, request: Request<ActionRequest>,) -> Result<Response<ActionReply>, Status> {
         let r = request.into_inner();
+        println!("Getting action {}", r.action);
         let handler = self
             .actions
             .get(&r.action)

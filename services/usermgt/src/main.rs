@@ -6,11 +6,11 @@ struct Request {
 }
 
 async fn get_users(req: Request, _: Context) -> Result<String, Problem> {
-    Ok(format!("Hello, {}!", req.name))
+    Ok(format!("get_users, {}!", req.name))
 }
 
 async fn get_user(_: Request, _: Context) -> Result<String, Problem> {
-    Ok(format!("Hello"))
+    Ok(format!("get_user yay"))
 }
 
 #[tokio::main]

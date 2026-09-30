@@ -27,12 +27,26 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
         let client = client.clone();
 
-        let service = service_fn(move |mut _req| {
+        let service = service_fn(move |req| {
             let mut client = client.clone();
 
             async move {
+                let path: Vec<&str> = req.uri().path().split('/').collect();
+                if path.iter().count() == 2 {
+                    return Ok::<_, hyper::Error>(
+                        Response::builder()
+                            .status(400)
+                            .body(Full::new(
+                                Bytes::from("url should be proxy and action")
+                            ))
+                            .unwrap()
+                    )
+                }
+
+                let action = path[2];
+
                 let request = tonic::Request::new(ActionRequest {
-                    action: "get_users".to_string(),
+                    action: action.to_string(),
                     data: "{\"name\": \"ow1\"}".to_string(),
                 });
                 
